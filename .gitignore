@@ -1,3 +1,6 @@
+# Custom project ignores
+configs/custom/*
+
 *.py[cod]
 
 # C extensions
