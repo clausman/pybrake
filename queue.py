@@ -45,10 +45,10 @@ class FileAction(object):
 		return self._name
 
 class Queue(object):
-	def __init__(self, folder, actions=[]):
+	def __init__(self, folder, actions=[], complete="../complete"):
 		self._folder = folder
 		self._actions = actions
-		self._done = []
+		self._complete = os.path.join(folder,complete)
 
 	def process(self):
 		files = list_files(self._folder)
@@ -66,11 +66,12 @@ class Queue(object):
 					log("Applied action", action)
 			if some_action:
 				files_affected += 1
+				print "File", file, "was affected; moving to complete at", self._complete
+				shutil.move(file, os.path.join(self._complete, os.path.basename(file)))
+
 		print "Processing complete"
 		print files_affected, "files affected"
-		print actions_taken, "actions taken"
-
-		
+		print actions_taken, "actions taken"		
 
 def log(*kwargs):
 	print " ".join(map(str, kwargs))

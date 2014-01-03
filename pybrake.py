@@ -14,7 +14,7 @@ import json
 class BinaryNotFoundError(Exception):
 	""" Error for when a binary cannot be located """
 
-def to_cli_args(obj, use_flags=True):
+def _to_cli_args(obj, use_flags=True):
 	args = []
 	dicts = []
 	if isinstance(obj, dict):
@@ -38,7 +38,7 @@ def to_cli_args(obj, use_flags=True):
 					args.append(str(v))
 	return args
 
-def find_binary(searchpath):
+def _find_binary(searchpath):
 	for path in searchpath:
 		location = os.path.join(path, 'HandBrakeCLI')
 		if os.path.exists(location):
@@ -47,7 +47,7 @@ def find_binary(searchpath):
 		raise BinaryNotFoundError('HandBrakeCLI binary not found in search path: '+" ".join(searchpath))
 	return location
 
-def call_shell(args):
+def _call_shell(args):
 	#TODO Advanced error handling, logging, 
 	print "Calling: ", s_join(args, " ")
 	proc.check_call(args)
@@ -59,9 +59,15 @@ def s_join(items, delim=","):
 class PyBrake(object):
 	__PATH__ = ["/usr/bin","/usr/sbin","/usr/local/bin"]
 
-	def convert(self, options={}):
-		# In and out options
-		option_args = to_cli_args(options)
+	def convert(self, options):
+		"""
+		Use handbrake to convert based on provided options
+		options can either be args from argparse or a dictionary
+		it's keys correspond to the command line options to HandBrakeCLI
+		For flags, use a value of true in the dictionary
+		For multi-argument options, lists are supported 
+		"""
+		option_args = _to_cli_args(options)
 		self._call(option_args)
 		
 
@@ -71,8 +77,19 @@ class PyBrake(object):
 		args - list of arguments to pass to cli
 		"""
 		if not hasattr(self, '__binary'):
-			self.__binary = find_binary(self.__PATH__)
-		call_shell([self.__binary] + args)
+			self.__binary = _find_binary(self.__PATH__)
+		_call_shell([self.__binary] + args)
+
+def convert(src, dest, config_file):
+	options = options_from_json(open(config_file))
+	options["input"] = src
+	options["output"] = dest
+	PyBrake().convert(options)
+
+def options_from_json(json_data):
+	# Might do more validation logic in the future
+	return json.load(json_data)
+
 
 def main():
 	brake = PyBrake()
@@ -85,7 +102,7 @@ def main():
 	args = parser.parse_args()
 	options = args
 	if args.config:
-		options = json.load(open(args.config))
+		options = options_from_json(open(args.config))
 		options["input"] = args.input
 		options["output"] = args.output
 

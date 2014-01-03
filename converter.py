@@ -8,13 +8,19 @@ from queue import Queue, FileAction
 import pybrake
 import shutil
 import os
+import time
 
 def convert(src, dest):
-	# Ensure dest directory exists
-	print "Creating blueray from", src, "to", dest
+	# Ensure dest directory exists	
 	print "Making directory for", dest
-	os.makedirs(os.path.dirname(dest))
-	pybrake.convert(src,dest,"config/pybrake/blueray.json")	
+	dirname = os.path.dirname(dest)
+	if not os.path.exists(dirname):
+		os.makedirs(dirname)
+	print "Converting from", src, "to", dest
+	if not os.path.isfile(dest):
+		pybrake.convert(src,dest,"config/pybrake/blueray.json")	
+	else:
+		print "ERROR:", dest, " already exists"
 
 def complete(src, dest):
 	print "Moving file from queue at", src, "to complete folder at", dest
@@ -25,6 +31,8 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("queue")
 	parser.add_argument("complete")
+	parser.add_argument("-s", "--service", action="store_true")
+	parser.add_argument("-p", "--period", default=600)
 	args = parser.parse_args()
 	actions = [
 		FileAction(
@@ -32,21 +40,22 @@ def main():
 			r'\1/../tv/\2/Season_\3/\2-s\3e\4.mp4',
 			convert,
 			name="convert tv episode"
-		),		
+			),
 		FileAction(
-			r'(.*/[^/]+.mkv)$',
-			args.complete,
-			complete,
-			name="move completed"
-		)	
+			r'(.*)/(\w+\d\d\d\d)\.mkv$',
+			r'\1/../movies/\2/\2.mp4',
+			convert,
+			name="convert movie"
+			)
 	]
 
 	q = Queue(args.queue, actions=actions)
 	q.process()
 
-class Foo():
-	def __call__(self, src, dest):
-		complete(src, dest)
+	if args.service:
+		while(True):
+			time.sleep(args.period)
+			q.process()
 
 
 if __name__ == "__main__":
