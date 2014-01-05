@@ -32,7 +32,7 @@ def main():
 	parser.add_argument("queue")
 	parser.add_argument("complete")
 	parser.add_argument("-s", "--service", action="store_true")
-	parser.add_argument("-p", "--period", default=600)
+	parser.add_argument("-p", "--period", default=600, type=float)
 	args = parser.parse_args()
 	actions = [
 		FileAction(
@@ -54,6 +54,7 @@ def main():
 
 	if args.service:
 		while(True):
+                        print "sleeping for", args.period, "before checking again"
 			time.sleep(args.period)
 			q.process()
 
