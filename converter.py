@@ -36,13 +36,13 @@ def main():
 	args = parser.parse_args()
 	actions = [
 		FileAction(
-			r'(.*)/(\w+)-s(\d\d)e(\d\d)\.mkv$',
+			r'(.*)/(\w+)[-_ ]s(\d\d)e(\d\d)\.mkv$',
 			r'\1/../tv/\2/Season_\3/\2-s\3e\4.mp4',
 			convert,
 			name="convert tv episode"
 			),
 		FileAction(
-			r'(.*)/(\w+\d\d\d\d)\.mkv$',
+			r'(.*)/([-\w ]+\(\d\d\d\d\))\.mkv$',
 			r'\1/../movies/\2/\2.mp4',
 			convert,
 			name="convert movie"
