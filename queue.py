@@ -68,6 +68,8 @@ class Queue(object):
 				files_affected += 1
 				print "File", file, "was affected; moving to complete at", self._complete
 				shutil.move(file, os.path.join(self._complete, os.path.basename(file)))
+                        else:
+                                print "File", file, "had not matching actions; leaving in place"
 
 		print "Processing complete"
 		print files_affected, "files affected"
