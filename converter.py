@@ -42,7 +42,7 @@ def main():
 			name="convert tv episode"
 			),
 		FileAction(
-			r'(.*)/([-\w ]+\(\d\d\d\d\))\.mkv$',
+			r"""(.*)/([-\w :']+\(\d\d\d\d\))\.mkv$""",
 			r'\1/../movies/\2/\2.mp4',
 			convert,
 			name="convert movie"
